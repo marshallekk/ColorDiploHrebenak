@@ -366,7 +366,7 @@ if __name__ == '__main__':
     os.makedirs('vystup/col', exist_ok=True)
     os.makedirs('vystup/gray', exist_ok=True)
     os.makedirs('kolorizuj', exist_ok=True)
-    os.makedirs('colorizuj/col', exist_ok=True)
+    os.makedirs('kolorizuj/col', exist_ok=True)
     os.makedirs('checkpointy', exist_ok=True)
 
 
@@ -421,13 +421,19 @@ if __name__ == '__main__':
             col_loader = torch.utils.data.DataLoader(col_imagefolder, batch_size=16, shuffle=False, num_workers = 8)
 
             if args.celeb:
-                model.load_state_dict(torch.load('checkpointy/celeba_checkpoint.pth'))
+                if use_gpu:
+                    model.load_state_dict(torch.load('checkpointy/celeba_checkpoint.pth'))
+                else:
+                    model.load_state_dict(torch.load('checkpointy/celeba_checkpoint.pth', map_location=torch.device('cpu')))
                 print("Checkpoint CelebA úspešne načítaný..")
                 with torch.no_grad():
                  losses = color(col_loader, model, criterion, save_images)
 
             elif args.places: 
-                checkpoint = torch.load('checkpointy/places365_checkpoint.pth')
+                if use_gpu:
+                    checkpoint = torch.load('checkpointy/places365_checkpoint.pth')
+                else:
+                    checkpoint = torch.load('checkpointy/places365_checkpoint.pth', map_location=torch.device('cpu'))
                 model.load_state_dict(checkpoint['model_state_dict'])
                 optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
                 epoch = checkpoint['epoch']
@@ -437,7 +443,10 @@ if __name__ == '__main__':
                  losses = color(col_loader, model, criterion, save_images)
 
             elif args.placeleb: 
-                checkpoint = torch.load('checkpointy/placeleb_checkpoint.pth')
+                if use_gpu:
+                    checkpoint = torch.load('checkpointy/placeleb_checkpoint.pth')
+                else:
+                    checkpoint = torch.load('checkpointy/placeleb_checkpoint.pth', map_location=torch.device('cpu'))
                 model.load_state_dict(checkpoint['model_state_dict'])
                 optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
                 epoch = checkpoint['epoch']
